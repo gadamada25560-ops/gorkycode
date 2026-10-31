@@ -37,21 +37,15 @@ function addMessage(role, text) {
   chatEl.scrollTop = chatEl.scrollHeight;
 }
 
-async function playSpeech(text) {
-  if (!text) return;
-  try {
-    const res = await fetch("/api/speak", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, history: [], speak: false }),
-    });
-    if (!res.ok) return;
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    if (currentAudio) currentAudio.pause();
-    currentAudio = new Audio(url);
-    currentAudio.play().catch(() => {});
-  } catch (_) {}
+function playAudioBase64(encoded) {
+  if (!encoded) return;
+  const binary = atob(encoded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+  const url = URL.createObjectURL(new Blob([bytes], { type: "audio/mpeg" }));
+  if (currentAudio) currentAudio.pause();
+  currentAudio = new Audio(url);
+  currentAudio.play().catch(() => {});
 }
 
 function openCard(item) {
@@ -107,13 +101,13 @@ async function sendText(text) {
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: value, history, speak: false }),
+      body: JSON.stringify({ text: value, history, speak: true }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(apiError(data, "Запрос не прошёл"));
     addMessage("assistant", data.reply);
+    playAudioBase64(data.audio_base64);
     history.push({ role: "assistant", content: data.reply });
-    playSpeech(data.reply);
     if (data.upcoming) renderEvents(data.upcoming);
     hintEl.textContent = "Можно говорить или писать";
   } catch (err) {

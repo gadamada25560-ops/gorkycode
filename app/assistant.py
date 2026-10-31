@@ -34,9 +34,9 @@ MONTHS = (
     "ноября",
     "декабря",
 )
-TYPE_LABELS = {
-    "task": "задача",
-    "meeting": "встреча",
+ACCUSATIVE = {
+    "task": "задачу",
+    "meeting": "встречу",
     "reminder": "напоминание",
 }
 
@@ -285,7 +285,7 @@ class Assistant:
                     description=description,
                 )
                 events = [created]
-                kind = TYPE_LABELS.get(created["event_type"], "запись")
+                kind = ACCUSATIVE.get(created["event_type"], "запись")
                 fallback = f"Поставила {kind}: {spoken_item(created)}."
                 if event_type == "meeting" and date and time:
                     conflicts = db.find_conflicts(self.conn, date, time, exclude_id=created["id"])
