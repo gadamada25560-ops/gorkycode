@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Задачи и встречи</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <h1>Задачи и встречи</h1>
+    </header>
+
+    <main class="layout">
+      <section class="stage">
+        <div class="chat" id="chat"></div>
+        <div class="composer">
+          <button id="mic" class="mic" type="button" aria-label="Голосовой ввод">●</button>
+          <input id="input" type="text" placeholder="Например: встреча завтра в 15:00 или что у меня на сегодня?" autocomplete="off" />
+          <button id="send" class="send" type="button">Отправить</button>
+        </div>
+        <p class="hint" id="hint">Нажмите на кружок и говорите. Когда замолчите, запись остановится сама.</p>
+      </section>
+
+      <aside class="side">
+        <div class="tabs">
+          <button data-scope="upcoming" class="active">Ближайшие</button>
+          <button data-scope="today">Сегодня</button>
+          <button data-scope="week">На неделе</button>
+        </div>
+        <ul class="events" id="events"></ul>
+      </aside>
+    </main>
+  </div>
+
+  <div class="overlay hidden" id="overlay">
+    <div class="card" role="dialog" aria-modal="true">
+      <button class="close" id="closeCard" type="button" aria-label="Закрыть">×</button>
+      <p class="kind" id="cardKind"></p>
+      <h2 id="cardTitle"></h2>
+      <dl>
+        <div><dt>Когда</dt><dd id="cardWhen"></dd></div>
+        <div><dt>Что это</dt><dd id="cardDescription"></dd></div>
+        <div><dt>Статус</dt><dd id="cardStatus"></dd></div>
+        <div><dt>Добавлено</dt><dd id="cardCreated"></dd></div>
+      </dl>
+    </div>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>

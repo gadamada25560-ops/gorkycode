@@ -1,0 +1,10 @@
+.env
+app/service_keys.txt
+__pycache__/
+*.pyc
+data/assistant.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+.venv/
+.vercel/

@@ -1,0 +1,15 @@
+[project]
+name = "gorki-assistant"
+version = "1.0.0"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi",
+  "uvicorn",
+  "python-dotenv",
+  "openai",
+  "groq",
+  "python-multipart",
+]
+
+[tool.vercel]
+entrypoint = "app.main:app"
