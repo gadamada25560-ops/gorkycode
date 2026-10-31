@@ -145,6 +145,7 @@ def build_system_prompt(ctx: dict[str, str]) -> str:
 - Говори как спокойная помощница: коротко, по делу, 1-3 предложения.
 - Никогда не называй id, номера записей, #, JSON, названия полей.
 - Не выдумывай события. Не говори «ищу» — либо результат, либо «не нашла».
+- Не пиши «слушаю дальше», «хорошо, слушаю», «продолжение следует». Если фраза не про дела, скажи, что не разобрала, и попроси повторить.
 - Даты словами: «завтра в 10:00», не «2026-11-01».
 - title без слов «завтра», «в 15:00».
 """
@@ -286,7 +287,11 @@ class Assistant:
                 )
                 events = [created]
                 kind = ACCUSATIVE.get(created["event_type"], "запись")
-                fallback = f"Поставила {kind}: {spoken_item(created)}."
+                bare = (created.get("title") or "").strip().lower()
+                if bare in {"встреча", "задача", "напоминание", "запись"}:
+                    fallback = f"Поставила {kind} {human_when(created)}."
+                else:
+                    fallback = f"Поставила {kind}: {spoken_item(created)}."
                 if event_type == "meeting" and date and time:
                     conflicts = db.find_conflicts(self.conn, date, time, exclude_id=created["id"])
                     if conflicts:
@@ -367,6 +372,8 @@ class Assistant:
 
         else:
             reply = model_reply or "Могу поставить задачу, встречу или найти, что уже есть в календаре."
+            if re.search(r"слушаю дальше|продолжение следует", reply, re.I):
+                reply = "Не разобрала. Скажите задачу, встречу или спросите, что запланировано."
 
         reply = sanitize_reply(reply)
 

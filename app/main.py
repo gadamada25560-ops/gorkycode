@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -123,6 +124,30 @@ def event_detail(event_id: int) -> dict:
     return item
 
 
+HALLUCINATED = (
+    "продолжение следует",
+    "субтитр",
+    "спасибо за просмотр",
+    "подписывайтесь",
+    "редактор субтитров",
+    "ставьте лайк",
+    "до новых встреч",
+)
+
+
+def clean_transcript(text: str) -> str:
+    parts = re.split(r"[.!?…\n]+", text)
+    kept = []
+    for part in parts:
+        norm = part.lower().replace("ё", "е").strip(" \t.,")
+        if not norm:
+            continue
+        if any(marker in norm for marker in HALLUCINATED):
+            continue
+        kept.append(part.strip())
+    return " ".join(kept).strip()
+
+
 @app.post("/api/transcribe")
 async def transcribe(audio: UploadFile = File(...)) -> dict:
     if not GROQ_API_KEY:
@@ -153,10 +178,11 @@ async def transcribe(audio: UploadFile = File(...)) -> dict:
             model=GROQ_STT_MODEL,
             language="ru",
             temperature=0,
+            prompt="Запрос в календарь: задача, встреча, напоминание, что сегодня, найди.",
         )
     except Exception as exc:
         raise HTTPException(502, f"Распознавание не прошло: {exc}") from exc
-    text = (getattr(result, "text", None) or str(result)).strip()
+    text = clean_transcript((getattr(result, "text", None) or str(result)).strip())
     return {"text": text}
 
 
